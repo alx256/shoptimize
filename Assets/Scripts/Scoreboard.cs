@@ -1,0 +1,134 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
+using UnityEngine;
+
+public class Scoreboard : MonoBehaviour
+{
+    private class ShoppingCart
+    {
+        private HashSet<Item> items;
+        private float totalSize;
+        private float totalSavings;
+        private int ranking;
+        private string agentName;
+
+        public HashSet<Item> Items { get { return items; } }
+        public float TotalSize
+        {
+            get { return totalSize; }
+            set { totalSize = value; }
+        }
+        public float TotalSavings
+        {
+            get { return totalSavings; }
+            set { totalSavings = value; }
+        }
+        public int Ranking
+        {
+            get { return ranking; }
+            set { ranking = value; }
+        }
+        public string AgentName
+        {
+            get { return agentName; }
+            set { agentName = value; }
+        }
+
+        public ShoppingCart()
+        {
+            items = new HashSet<Item>();
+            totalSize = 0.0f;
+            totalSavings = 0.0f;
+            ranking = -1;
+            agentName = "Unnamed Agent";
+        }
+    }
+
+    [SerializeField]
+    private TextMeshProUGUI scoreboardText;
+
+    private static Scoreboard instance;
+    private Dictionary<int, ShoppingCart> shoppingCarts;
+    private List<int> rankings;
+
+    public static Scoreboard Instance { get { return instance; } }
+
+    public void RegisterId(int id, string name)
+    {
+        // Insert at last rank by default.
+        ShoppingCart cart = new()
+        {
+            AgentName = name,
+            Ranking = rankings.Count
+        };
+        shoppingCarts.Add(id, cart);
+        rankings.Add(id);
+
+        UpdateRankings();
+    }
+
+    public void AddItem(int id, Item item)
+    {
+        if (!shoppingCarts.ContainsKey(id))
+        {
+            Debug.LogWarning("Tried to add item to unregistered id!");
+            return;
+        }
+
+        if (!CanAdd(id, item))
+        {
+            Debug.LogWarning("Tried to add item that there is no space for! Ignoring.");
+            return;
+        }
+
+        ShoppingCart cart = shoppingCarts[id];
+        cart.Items.Add(item);
+        cart.TotalSize += item.Size;
+        cart.TotalSavings += item.Discount;
+
+        if (cart.Ranking == -1)
+        {
+            rankings.Add(id);
+            cart.Ranking = rankings.Count - 1;
+        }
+
+        UpdateRankings();
+    }
+
+    public bool CanAdd(int id, Item item)
+    {
+        return shoppingCarts.ContainsKey(id) &&
+            shoppingCarts[id].TotalSize + item.Size <= Parameters.Instance.ShoppingCartCapacity;
+    }
+
+    private void Awake()
+    {
+        instance = this;
+        shoppingCarts = new();
+        rankings = new List<int>();
+    }
+
+    private void UpdateRankings()
+    {
+        string rankingsStr = "";
+
+        foreach (int id in rankings)
+        {
+            if (!shoppingCarts.ContainsKey(id))
+            {
+                Debug.LogWarning("Rankings contains reference to ID that is not registered!");
+                continue;
+            }
+
+            ShoppingCart cart = shoppingCarts[id];
+
+            rankingsStr += string.Format("{0} : ${1:0.00}\n",
+                cart.AgentName,
+                cart.TotalSavings);
+        }
+
+        scoreboardText.text = rankingsStr;
+    }
+}
