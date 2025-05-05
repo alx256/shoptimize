@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BoustrophedonDecomposition : MonoBehaviour
+public class BoustrophedonDecomposition : MovementStrategy
 {
     private CharacterController characterController;
 

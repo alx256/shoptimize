@@ -1,22 +1,22 @@
 using UnityEngine;
 
-public class RandomExploration : MonoBehaviour
+public class RandomExploration : MovementStrategy
 {
-    private CharacterController characterController;
+    private Agent agent;
     private Eyes eyes;
 
     private const int SPEED_DIVISOR = 50;
 
     private void Start()
     {
-        characterController = GetComponent<CharacterController>();
+        agent = GetComponent<Agent>();
         eyes = GetComponent<Eyes>();
         RotateRandomly();
     }
 
     private void Update()
     {
-        characterController.Move(transform.forward * Time.deltaTime);
+        agent.Move(transform.forward * Time.deltaTime);
 
         if (eyes.ShortSightedLook().Count != 0)
         {

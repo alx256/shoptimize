@@ -18,6 +18,8 @@ public class Parameters : MonoBehaviour
     private float maxSize;
     [SerializeField]
     private float shoppingCartCapacity;
+    [SerializeField]
+    private float timeScale = 1.0f;
 
     public static Parameters Instance { get { return instance; } }
     public float MinBaseValue { get { return minBaseValue; } }
@@ -31,5 +33,10 @@ public class Parameters : MonoBehaviour
     private void Awake()
     {
         instance = this;
+    }
+
+    private void Update()
+    {
+        Time.timeScale = timeScale;
     }
 }

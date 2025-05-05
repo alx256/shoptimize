@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -124,9 +125,10 @@ public class Scoreboard : MonoBehaviour
 
             ShoppingCart cart = shoppingCarts[id];
 
-            rankingsStr += string.Format("{0} : ${1:0.00}\n",
+            rankingsStr += string.Format("{0} : ${1:0.00} ({2}% full)\n",
                 cart.AgentName,
-                cart.TotalSavings);
+                cart.TotalSavings,
+                Math.Round(100 * (cart.TotalSize / Parameters.Instance.ShoppingCartCapacity), 2));
         }
 
         scoreboardText.text = rankingsStr;

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GreedySelection : MonoBehaviour
+public class GreedySelection : SelectionStrategy
 {
     private Eyes eyes;
 
