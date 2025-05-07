@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 9021666302150033318}
   m_Layer: 6
   m_Name: Item
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -122,10 +122,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dccf1e1d024ea234bb4c273188287198, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseValue: 0
-  discount: 0
+  baseValue: -1
+  discount: -1
   savedValue: 0
-  size: 0
+  size: -1
 --- !u!65 &9021666302150033318
 BoxCollider:
   m_ObjectHideFlags: 0

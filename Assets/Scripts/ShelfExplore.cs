@@ -123,8 +123,6 @@ public class ShelfExplore : MonoBehaviour
 
     private void Exploring()
     {
-        Debug.Log(cycles);
-
         if (isRotating)
         {
             transform.RotateAround(rotateAroundPoint, Vector3.up, -ROTATION_STEP * Time.deltaTime * multiplier);

@@ -20,6 +20,8 @@ public class Parameters : MonoBehaviour
     private float shoppingCartCapacity;
     [SerializeField]
     private float timeScale = 1.0f;
+    [SerializeField]
+    private int environmentValuesSeed = 123;
 
     public static Parameters Instance { get { return instance; } }
     public float MinBaseValue { get { return minBaseValue; } }
@@ -29,6 +31,7 @@ public class Parameters : MonoBehaviour
     public float MinSize { get { return minSize; } }
     public float MaxSize { get { return maxSize; } }
     public float ShoppingCartCapacity { get { return shoppingCartCapacity; } }
+    public int EnvironmentValuesSeed { get { return environmentValuesSeed; } }
 
     private void Awake()
     {

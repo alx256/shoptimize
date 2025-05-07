@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Item : MonoBehaviour
@@ -12,6 +13,7 @@ public class Item : MonoBehaviour
     private float size;
 
     private Parameters parameters;
+    private System.Random random;
 
     public float BaseValue { get { return baseValue; } }
     public float Discount { get { return discount; } }
@@ -22,12 +24,30 @@ public class Item : MonoBehaviour
     {
         parameters = Parameters.Instance;
 
-        baseValue = Random.Range(parameters.MinBaseValue,
-            parameters.MaxBaseValue);
-        discount = Random.Range(parameters.MinDiscount,
-            parameters.MaxDiscount);
+        // Use System.Random instead of Unity's Random to
+        // only use the seed for generating item values
+        // and sizes
+        random = new System.Random(transform.position.GetHashCode());
+
+        if (random == null)
+        {
+            random = new(parameters.EnvironmentValuesSeed * transform.position.GetHashCode());
+        }
+
+        baseValue = (baseValue == -1) ?
+            RandomFloat(parameters.MinBaseValue, parameters.MaxBaseValue) :
+            baseValue;
+        discount = (discount == -1) ?
+            RandomFloat(parameters.MinDiscount, parameters.MaxDiscount) :
+            discount;
+        size = (size == -1) ?
+            RandomFloat(parameters.MinSize, parameters.MaxSize) :
+            size;
         savedValue = baseValue - (baseValue * discount);
-        size = Random.Range(parameters.MinSize,
-            parameters.MaxSize);
+    }
+
+    private float RandomFloat(float start, float end)
+    {
+        return start + (end - start) * (float)random.NextDouble();
     }
 }

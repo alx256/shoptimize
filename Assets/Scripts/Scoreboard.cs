@@ -7,15 +7,15 @@ using UnityEngine;
 
 public class Scoreboard : MonoBehaviour
 {
-    private class ShoppingCart
+    public class ShoppingCart
     {
-        private HashSet<Item> items;
+        private List<Item> items;
         private float totalSize;
         private float totalSavings;
         private int ranking;
         private string agentName;
 
-        public HashSet<Item> Items { get { return items; } }
+        public List<Item> Items { get { return items; } }
         public float TotalSize
         {
             get { return totalSize; }
@@ -39,7 +39,7 @@ public class Scoreboard : MonoBehaviour
 
         public ShoppingCart()
         {
-            items = new HashSet<Item>();
+            items = new List<Item>();
             totalSize = 0.0f;
             totalSavings = 0.0f;
             ranking = -1;
@@ -87,7 +87,29 @@ public class Scoreboard : MonoBehaviour
         ShoppingCart cart = shoppingCarts[id];
         cart.Items.Add(item);
         cart.TotalSize += item.Size;
-        cart.TotalSavings += item.Discount;
+        cart.TotalSavings += item.SavedValue;
+
+        if (cart.Ranking == -1)
+        {
+            rankings.Add(id);
+            cart.Ranking = rankings.Count - 1;
+        }
+
+        UpdateRankings();
+    }
+
+    public void RemoveItem(int id, Item item)
+    {
+        if (!shoppingCarts.ContainsKey(id))
+        {
+            Debug.LogWarning("Tried to add item to unregistered id!");
+            return;
+        }
+
+        ShoppingCart cart = shoppingCarts[id];
+        cart.Items.Remove(item);
+        cart.TotalSize -= item.Size;
+        cart.TotalSavings -= item.SavedValue;
 
         if (cart.Ranking == -1)
         {
