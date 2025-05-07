@@ -1074,7 +1074,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8831267776784092742, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2506,6 +2506,10 @@ PrefabInstance:
     - target: {fileID: 8831267776784092742, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
       propertyPath: m_Name
       value: ShelfExploreRatioSelection
+      objectReference: {fileID: 0}
+    - target: {fileID: 8831267776784092742, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14796,14 +14800,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 855175983}
     m_Modifications:
-    - target: {fileID: 3062845501738515672, guid: bd9f337965bd85b4e9789de8700ece86, type: 3}
-      propertyPath: discount
-      value: 0.9999
-      objectReference: {fileID: 0}
-    - target: {fileID: 3062845501738515672, guid: bd9f337965bd85b4e9789de8700ece86, type: 3}
-      propertyPath: baseValue
-      value: 100000
-      objectReference: {fileID: 0}
     - target: {fileID: 8046048766678771719, guid: bd9f337965bd85b4e9789de8700ece86, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.61337113
@@ -16790,7 +16786,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8831267776784092742, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -60,32 +60,6 @@ public class GeneticAlgorithm : SelectionStrategy
         public float Fitness()
         {
             return (totalSize > Parameters.Instance.ShoppingCartCapacity) ? -1.0f : totalSavedValue;
-
-            // if (!updateRequired)
-            // {
-            //     return cachedFitness;
-            // }
-
-            // float totalSavedValue = 0.0f;
-            // float totalSize = 0.0f;
-            // int index = 0;
-
-            // foreach (int frequency in data)
-            // {
-            //     Item item = itemsPool[index++];
-            //     totalSavedValue += item.SavedValue;
-            //     totalSize += item.Size;
-
-            //     if (totalSize > Parameters.Instance.ShoppingCartCapacity)
-            //     {
-            //         // Invalid solution
-            //         cachedFitness = -1.0f;
-            //         return -1.0f;
-            //     }
-            // }
-
-            // cachedFitness = totalSavedValue;
-            // return totalSavedValue;
         }
 
         private void BackfillFrom(int index)
@@ -108,6 +82,25 @@ public class GeneticAlgorithm : SelectionStrategy
             }
 
             return (f1 > f2) ? 1 : -1;
+        }
+
+        public override string ToString()
+        {
+            string s = "[";
+            int i = 0;
+
+            foreach (int occurences in data)
+            {
+                s += occurences;
+
+                if (i < data.Count - 1)
+                {
+                    s += ", ";
+                }
+            }
+
+            s += "]";
+            return s;
         }
     }
 
@@ -159,6 +152,7 @@ public class GeneticAlgorithm : SelectionStrategy
             {
                 started = true;
                 RandomInitialisation();
+                System.Array.Sort(population);
             }
             else
             {
@@ -178,8 +172,6 @@ public class GeneticAlgorithm : SelectionStrategy
             replacementPopulation[i + 1] = RandomAdd(children[1]);
         }
 
-        System.Array.Sort(population);
-
         // Replace first G solutions (AKA least fit solutions)
         // with the replacement population
         for (int i = 0; i < G; i++)
@@ -187,16 +179,38 @@ public class GeneticAlgorithm : SelectionStrategy
             population[i] = replacementPopulation[i];
         }
 
-        if (bestSolution != null)
+        System.Array.Sort(population);
+        Solution candidateBest = population.Last();
+
+        if (candidateBest.Fitness() == -1)
         {
-            int[] diff = bestSolution.GetDifference(population.Last());
+            Debug.LogWarning("Best solution in GA was invalid");
+        }
+        else if (bestSolution == null)
+        {
+            for (int i = 0; i < itemsPool.Count; i++)
+            {
+                int occurences = candidateBest.Get(i);
+
+                if (occurences != 0)
+                {
+                    for (int j = 0; j < occurences; j++)
+                    {
+                        Scoreboard.Instance.AddItem(gameObject.GetInstanceID(), itemsPool[i]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            int[] diff = bestSolution.GetDifference(candidateBest);
             int index = 0;
 
             foreach (int change in diff)
             {
                 if (change < 0)
                 {
-                    for (int i = 0; i < change; i++)
+                    for (int i = 0; i < Mathf.Abs(change); i++)
                     {
                         Scoreboard.Instance.RemoveItem(gameObject.GetInstanceID(), itemsPool[index]);
                     }
@@ -221,7 +235,7 @@ public class GeneticAlgorithm : SelectionStrategy
             }
         }
 
-        bestSolution = population.Last();
+        bestSolution = candidateBest;
     }
 
     private void RandomInitialisation()
@@ -232,7 +246,7 @@ public class GeneticAlgorithm : SelectionStrategy
 
             for (int j = 0; j < MINIMUM_SEEN_ITEMS; j++)
             {
-                solution.UseItem(Random.Range(0, itemsPool.Count - 1));
+                solution.UseItem(Random.Range(0, itemsPool.Count));
             }
 
             population[i] = solution;
@@ -251,7 +265,7 @@ public class GeneticAlgorithm : SelectionStrategy
             // Choose TOURNAMENT_SIZE random individuals from the population
             for (int j = 0; j < TOURNAMENT_SIZE; j++)
             {
-                Solution solution = population[Random.Range(0, population.Length - 1)];
+                Solution solution = population[Random.Range(0, population.Length)];
                 float fitness = solution.Fitness();
 
                 if (fitness > bestFitness)
@@ -274,7 +288,7 @@ public class GeneticAlgorithm : SelectionStrategy
         for (int i = 0; i < itemsPool.Count; i++)
         {
             // 50/50 chance of swapping
-            if (Random.Range(0, 1) == 0)
+            if (Random.Range(0, 2) == 0)
             {
                 children[0].Put(i, b.Get(i));
                 children[1].Put(i, a.Get(i));
@@ -293,10 +307,10 @@ public class GeneticAlgorithm : SelectionStrategy
     {
         for (int i = 0; i < itemsPool.Count; i++)
         {
-            if (Random.Range(0, 8) == 0)
+            if (Random.Range(0, 9) == 0)
             {
-                int multiplier = (Random.Range(0, 1) == 0) ? 1 : -1;
-                solution.Put(i, solution.Get(i) + i * multiplier);
+                int multiplier = (Random.Range(0, 2) == 0) ? 1 : -1;
+                solution.Put(i, solution.Get(i) + 1 * multiplier);
             }
         }
 
