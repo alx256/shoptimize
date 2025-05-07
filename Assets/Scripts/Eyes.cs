@@ -10,6 +10,9 @@ public class Eyes : MonoBehaviour
     private const float LONG_SIGHTED_MAX_DISTANCE = 100.0f;
     private const float JUST_IN_FRONT_DISTANCE = 1.0f;
     private const float LOOK_ANGLE_ADJUST = 0.33f;
+    private readonly HashSet<string> CAPTURE_PARENT_LAYERS = new(new string[]{
+        "Shelf"
+    });
 
     public HashSet<GameObject> ShortSightedScan()
     {
@@ -47,7 +50,16 @@ public class Eyes : MonoBehaviour
         // to the set, not the collided object.
         //
         // Right now, we only do this with shelves.
-        bool captureParent = ((mask >> LayerMask.NameToLayer("Shelf")) & 1) == 1;
+        bool captureParent = false;
+
+        foreach (string layer in CAPTURE_PARENT_LAYERS)
+        {
+            if (((mask >> LayerMask.NameToLayer(layer)) & 1) == 1)
+            {
+                captureParent = true;
+                break;
+            }
+        }
 
         while (lookAngle <= lookAngleEnd)
         {
@@ -62,7 +74,9 @@ public class Eyes : MonoBehaviour
                                 distance,
                                 mask))
             {
-                set.Add(captureParent ? hit.collider.transform.parent.gameObject : hit.collider.gameObject);
+                set.Add((captureParent && CAPTURE_PARENT_LAYERS.Contains(LayerMask.LayerToName(hit.transform.gameObject.layer)))
+                    ? hit.collider.transform.parent.gameObject :
+                    hit.collider.gameObject);
             }
 
             lookAngle += LOOK_ANGLE_ADJUST;
