@@ -113,8 +113,8 @@ public class GeneticAlgorithm : SelectionStrategy
     private const int TOURNAMENT_SIZE = 200;
     private const float ALPHA = 0.5f;
     private const int G = (int)(ALPHA * POPULATION_SIZE);
-    private const float CROSSOVER_PROBABILITY = 0.33f;
-    private const int THINK_FRAME = 25;
+    private const int THINK_FRAME = 3;
+    private const int ACT_FRAME = 250;
     private bool started = false;
     private Solution bestSolution;
     private Solution[] replacementPopulation;
@@ -181,63 +181,67 @@ public class GeneticAlgorithm : SelectionStrategy
             population[i] = replacementPopulation[i];
         }
 
-        System.Array.Sort(population);
-        Solution candidateBest = population.Last();
 
-        if (candidateBest.Fitness() == -1)
+        if (Time.frameCount % ACT_FRAME == 0)
         {
-            Debug.LogWarning("Best solution in GA was invalid");
-        }
-        else if (bestSolution == null)
-        {
-            for (int i = 0; i < itemsPool.Count; i++)
+            System.Array.Sort(population);
+            Solution candidateBest = population.Last();
+
+            if (candidateBest.Fitness() == -1)
             {
-                int occurences = candidateBest.Get(i);
-
-                if (occurences != 0)
+                Debug.LogWarning("Best solution in GA was invalid");
+            }
+            else if (bestSolution == null)
+            {
+                for (int i = 0; i < itemsPool.Count; i++)
                 {
-                    for (int j = 0; j < occurences; j++)
+                    int occurences = candidateBest.Get(i);
+
+                    if (occurences != 0)
                     {
-                        agent.Fetch(itemsPool[i]);
+                        for (int j = 0; j < occurences; j++)
+                        {
+                            agent.Fetch(itemsPool[i]);
+                        }
                     }
                 }
             }
-        }
-        else
-        {
-            int[] diff = bestSolution.GetDifference(candidateBest);
-            int index = 0;
-
-            foreach (int change in diff)
+            else
             {
-                if (change < 0)
+                int[] diff = bestSolution.GetDifference(candidateBest);
+                int index = 0;
+
+                foreach (int change in diff)
                 {
-                    for (int i = 0; i < Mathf.Abs(change); i++)
+                    if (change < 0)
                     {
-                        agent.Discard(itemsPool[index]);
+                        for (int i = 0; i < Mathf.Abs(change); i++)
+                        {
+                            agent.Discard(itemsPool[index]);
+                        }
                     }
+
+                    index++;
                 }
 
-                index++;
-            }
+                index = 0;
 
-            index = 0;
-
-            foreach (int change in diff)
-            {
-                if (change > 0)
+                foreach (int change in diff)
                 {
-                    for (int i = 0; i < change; i++)
+                    if (change > 0)
                     {
-                        agent.Fetch(itemsPool[index]);
+                        for (int i = 0; i < change; i++)
+                        {
+                            agent.Fetch(itemsPool[index]);
+                        }
                     }
+
+                    index++;
                 }
-
-                index++;
             }
-        }
 
-        bestSolution = candidateBest;
+            bestSolution = candidateBest;
+        }
     }
 
     private void RandomInitialisation()
