@@ -26,9 +26,12 @@ public class Agent : MonoBehaviour
     private NavMeshAgent navMeshAgent;
     private Operation currentOperation;
     private bool isReturning = false;
+    private bool wasMovingToDestination = false;
+    private Quaternion targetRotation;
     private Vector3 returnPoint;
+    private Vector3 originalDestination;
     private Quaternion returnRotation;
-    private Queue<Operation> operationQueue = new();
+    private readonly Queue<Operation> operationQueue = new();
 
     public void Move(Vector3 movement)
     {
@@ -51,60 +54,54 @@ public class Agent : MonoBehaviour
     {
         if (HasReachedPoint())
         {
-            OperationAction currentAction = currentOperation.action;
-            Item itemOfInterest = currentOperation.itemOfInterest;
-
-            if (currentAction != OperationAction.NONE)
-            {
-                if (currentAction == OperationAction.FETCH && Scoreboard.Instance.AddItem(gameObject, itemOfInterest) ||
-                    currentAction == OperationAction.DISCARD && Scoreboard.Instance.RemoveItem(gameObject, itemOfInterest))
-                {
-                    currentOperation.action = OperationAction.NONE;
-                    isReturning = true;
-                    ClearDestination();
-                    navMeshAgent.SetDestination(returnPoint);
-                }
-            }
-
             if (isReturning)
             {
                 isReturning = false;
                 ClearDestination();
-                transform.rotation = returnRotation;
+                transform.rotation = targetRotation;
                 SetStrategiesEnabled(true);
+
+                if (wasMovingToDestination)
+                {
+                    navMeshAgent.SetDestination(originalDestination);
+                }
             }
-        }
+            else if (currentOperation.action != OperationAction.NONE)
+            {
+                if (currentOperation.action == OperationAction.DISCARD &&
+                    Scoreboard.Instance.RemoveItem(gameObject, currentOperation.itemOfInterest) ||
+                    currentOperation.action == OperationAction.FETCH &&
+                    Scoreboard.Instance.AddItem(gameObject, currentOperation.itemOfInterest))
+                {
+                    currentOperation.action = OperationAction.NONE;
+                    ClearDestination();
 
-        if (currentOperation.action != OperationAction.NONE || isReturning)
-        {
-            navMeshAgent.Move(transform.forward * Time.deltaTime);
-        }
-        else if (operationQueue.Count != 0)
-        {
-            Operation operation = operationQueue.Dequeue();
-            currentOperation = operation;
-            navMeshAgent.SetDestination(operation.itemOfInterest.transform.position);
-
-            returnPoint = transform.position;
-            returnRotation = transform.rotation;
-            SetStrategiesEnabled(false);
+                    if (operationQueue.Count == 0)
+                    {
+                        isReturning = true;
+                        targetRotation = returnRotation;
+                        navMeshAgent.SetDestination(returnPoint);
+                    }
+                }
+            }
+            else if (operationQueue.Count != 0)
+            {
+                Operation operation = operationQueue.Dequeue();
+                currentOperation = operation;
+                navMeshAgent.SetDestination(operation.itemOfInterest.transform.position);
+                SetStrategiesEnabled(false);
+            }
         }
     }
 
     public void Fetch(Item item)
     {
-        Operation operation = new();
-        operation.action = OperationAction.FETCH;
-        operation.itemOfInterest = item;
-        operationQueue.Enqueue(operation);
+        AddOperation(OperationAction.FETCH, item);
     }
 
     public void Discard(Item item)
     {
-        Operation operation = new();
-        operation.action = OperationAction.DISCARD;
-        operation.itemOfInterest = item;
-        operationQueue.Enqueue(operation);
+        AddOperation(OperationAction.DISCARD, item);
     }
 
     public bool HasReachedPoint()
@@ -118,6 +115,20 @@ public class Agent : MonoBehaviour
     {
         navMeshAgent.isStopped = true;
         navMeshAgent.ResetPath();
+    }
+
+    private void AddOperation(OperationAction action, Item item)
+    {
+        Operation operation = new()
+        {
+            action = action,
+            itemOfInterest = item
+        };
+        operationQueue.Enqueue(operation);
+        returnPoint = transform.position;
+        returnRotation = transform.rotation;
+        originalDestination = navMeshAgent.destination;
+        wasMovingToDestination = navMeshAgent.hasPath;
     }
 
     private void SetStrategiesEnabled(bool enabled)

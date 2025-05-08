@@ -73,10 +73,13 @@ public class Scoreboard : MonoBehaviour
     public bool AddItem(GameObject adder, Item item)
     {
         int id = adder.GetInstanceID();
+        float distance = Vector3.Distance(adder.transform.position, item.transform.position);
 
-        if (Vector3.Distance(adder.transform.position, item.transform.position) > Parameters.Instance.MaxPickupDistance)
+        if (distance > Parameters.Instance.MaxPickupDistance)
         {
-            Debug.LogWarning("Tried to add an item that was too far away!");
+            Debug.LogWarning("Tried to add an item that was too far away (item was " + distance + " away)");
+            Debug.Log(item.transform.position);
+            Debug.Log(item.name);
             return false;
         }
 
@@ -110,10 +113,13 @@ public class Scoreboard : MonoBehaviour
     public bool RemoveItem(GameObject adder, Item item)
     {
         int id = adder.GetInstanceID();
+        float distance = Vector3.Distance(adder.transform.position, item.transform.position);
 
-        if (Vector3.Distance(adder.transform.position, item.transform.position) > Parameters.Instance.MaxPickupDistance)
+        if (distance > Parameters.Instance.MaxPickupDistance)
         {
-            Debug.LogWarning("Tried to remove an item but was too far away to put it back!");
+            Debug.LogWarning("Tried to remove an item but was too far away to put it back (item was " + distance + " away)");
+            Debug.Log(item.transform.position);
+            Debug.Log(item.name);
             return false;
         }
 
