@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class ShelfExplore : MonoBehaviour
+public class ShelfExplore : MovementStrategy
 {
     private enum Phase
     {
@@ -27,9 +27,7 @@ public class ShelfExplore : MonoBehaviour
     private HashSet<GameObject> shelfPool;
     private NavMeshAgent navMeshAgent;
     private bool isRotating = false;
-    private bool isCorrecting = false;
     private float totalRotation = 0.0f;
-    private float rotationTarget;
     private Vector3 rotateAroundPoint;
     private GameObject lastViewedItem;
     private GameObject firstViewedItem;
@@ -80,7 +78,6 @@ public class ShelfExplore : MonoBehaviour
                 multiplier = 1;
                 cycles = 0;
                 firstViewedItem = null;
-                lastViewedItem = null;
 
                 if (shelfQueue.Count > 0)
                 {
@@ -116,8 +113,7 @@ public class ShelfExplore : MonoBehaviour
         {
             transform.LookAt(new Vector3(currentShelf.transform.position.x, transform.position.y, currentShelf.transform.position.z));
             TransitionTo(Phase.EXPLORING);
-            navMeshAgent.isStopped = true;
-            navMeshAgent.ResetPath();
+            agent.ClearDestination();
         }
     }
 

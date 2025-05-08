@@ -43,7 +43,7 @@ public class SavingsSizeRatioSelection : SelectionStrategy
         {
             if (Scoreboard.Instance.CanAdd(gameObject.GetInstanceID(), item))
             {
-                Scoreboard.Instance.AddItem(gameObject.GetInstanceID(), item);
+                Scoreboard.Instance.AddItem(gameObject, item);
             }
         }
 

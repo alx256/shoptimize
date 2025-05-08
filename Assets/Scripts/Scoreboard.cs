@@ -70,8 +70,16 @@ public class Scoreboard : MonoBehaviour
         UpdateRankings();
     }
 
-    public void AddItem(int id, Item item)
+    public void AddItem(GameObject adder, Item item)
     {
+        int id = adder.GetInstanceID();
+
+        if (Vector3.Distance(adder.transform.position, item.transform.position) > Parameters.Instance.MaxPickupDistance)
+        {
+            Debug.LogWarning("Tried to add an item that was too far away!");
+            return;
+        }
+
         if (!shoppingCarts.ContainsKey(id))
         {
             Debug.LogWarning("Tried to add item to unregistered id!");
@@ -98,8 +106,16 @@ public class Scoreboard : MonoBehaviour
         UpdateRankings();
     }
 
-    public void RemoveItem(int id, Item item)
+    public void RemoveItem(GameObject adder, Item item)
     {
+        int id = adder.GetInstanceID();
+
+        if (Vector3.Distance(adder.transform.position, item.transform.position) > Parameters.Instance.MaxPickupDistance)
+        {
+            Debug.LogWarning("Tried to remove an item but was too far away to put it back!");
+            return;
+        }
+
         if (!shoppingCarts.ContainsKey(id))
         {
             Debug.LogWarning("Tried to add item to unregistered id!");

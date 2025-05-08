@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,10 +11,14 @@ public class Agent : MonoBehaviour
     private MovementStrategy[] movementStrategies;
     private SelectionStrategy[] selectionStrategies;
     private NavMeshAgent navMeshAgent;
-    private bool isMovingTowardsDestination = false;
-    private Vector3 destination;
-    private Eyes eyes;
-    private int shelfMask;
+    private bool isFetching = false;
+    private bool isDiscarding = false;
+    private bool isReturning = false;
+    private Vector3 returnPoint;
+    private Quaternion returnRotation;
+    private Item itemOfInterest;
+    private Queue<Item> fetchQueue = new();
+    private Queue<Item> discardQueue = new();
 
     public void Move(Vector3 movement)
     {
@@ -26,33 +32,72 @@ public class Agent : MonoBehaviour
         movementStrategies = GetComponents<MovementStrategy>();
         selectionStrategies = GetComponents<SelectionStrategy>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-        eyes = GetComponent<Eyes>();
-
-        shelfMask = 1 << LayerMask.NameToLayer("Shelf");
     }
 
     private void Update()
     {
-        if (isMovingTowardsDestination)
+        if (HasReachedPoint())
         {
-            GameObject directlyInFront = eyes.PeekDirectlyInFront(shelfMask);
-
-            navMeshAgent.SetDestination(destination);
-            transform.LookAt(new Vector3(destination.x, transform.position.y, destination.z));
-
-            if (directlyInFront != null && directlyInFront.transform.position == destination)
+            if (isFetching || isDiscarding)
             {
-                isMovingTowardsDestination = false;
+                isReturning = true;
+                ClearDestination();
+                navMeshAgent.SetDestination(returnPoint);
+
+                if (isFetching)
+                {
+                    isFetching = false;
+                    Scoreboard.Instance.AddItem(gameObject, itemOfInterest);
+                }
+                else if (isDiscarding)
+                {
+                    isDiscarding = false;
+                    Scoreboard.Instance.RemoveItem(gameObject, itemOfInterest);
+                }
+            }
+
+            if (isReturning)
+            {
+                isReturning = false;
+                ClearDestination();
+                transform.rotation = returnRotation;
                 SetStrategiesEnabled(true);
             }
         }
+
+        if (isFetching || isReturning || isDiscarding)
+        {
+            navMeshAgent.Move(transform.forward * Time.deltaTime);
+        }
+        else if (fetchQueue.Count != 0 || discardQueue.Count != 0)
+        {
+            if (fetchQueue.Count != 0)
+            {
+                isFetching = true;
+            }
+            else if (discardQueue.Count != 0)
+            {
+                isDiscarding = true;
+            }
+
+            Item item = (fetchQueue.Count != 0) ? fetchQueue.Dequeue() : discardQueue.Dequeue();
+            navMeshAgent.SetDestination(item.transform.position);
+
+            returnPoint = transform.position;
+            returnRotation = transform.rotation;
+            itemOfInterest = item;
+            SetStrategiesEnabled(false);
+        }
     }
 
-    public void GoTo(GameObject target)
+    public void Fetch(Item item)
     {
-        destination = target.transform.position;
-        isMovingTowardsDestination = true;
-        SetStrategiesEnabled(false);
+        fetchQueue.Enqueue(item);
+    }
+
+    public void Discard(Item item)
+    {
+        discardQueue.Enqueue(item);
     }
 
     public bool HasReachedPoint()
@@ -60,6 +105,12 @@ public class Agent : MonoBehaviour
         return !navMeshAgent.pathPending &&
             navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance &&
             (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude == 0f);
+    }
+
+    public void ClearDestination()
+    {
+        navMeshAgent.isStopped = true;
+        navMeshAgent.ResetPath();
     }
 
     private void SetStrategiesEnabled(bool enabled)

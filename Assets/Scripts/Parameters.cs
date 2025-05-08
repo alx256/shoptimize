@@ -22,6 +22,8 @@ public class Parameters : MonoBehaviour
     private float timeScale = 1.0f;
     [SerializeField]
     private int environmentValuesSeed = 123;
+    [SerializeField]
+    private float maxPickupDistance = 2.0f;
 
     public static Parameters Instance { get { return instance; } }
     public float MinBaseValue { get { return minBaseValue; } }
@@ -32,6 +34,7 @@ public class Parameters : MonoBehaviour
     public float MaxSize { get { return maxSize; } }
     public float ShoppingCartCapacity { get { return shoppingCartCapacity; } }
     public int EnvironmentValuesSeed { get { return environmentValuesSeed; } }
+    public float MaxPickupDistance { get { return maxPickupDistance; } }
 
     private void Awake()
     {

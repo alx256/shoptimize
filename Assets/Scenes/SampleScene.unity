@@ -2509,7 +2509,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8831267776784092742, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -11028,6 +11028,7 @@ MonoBehaviour:
   shoppingCartCapacity: 300
   timeScale: 3
   environmentValuesSeed: 123
+  maxPickupDistance: 2
 --- !u!4 &1450376537
 Transform:
   m_ObjectHideFlags: 0
@@ -12219,10 +12220,6 @@ PrefabInstance:
     - target: {fileID: 1675611597894746192, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
       propertyPath: m_AutoBraking
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1675611597894746192, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
-      propertyPath: m_AngularSpeed
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1675611597894746192, guid: e25b929b9fc42bb4f8867b2c59079bed, type: 3}
       propertyPath: m_StoppingDistance

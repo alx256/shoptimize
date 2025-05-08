@@ -5,10 +5,12 @@ using UnityEngine;
 public class GreedySelection : SelectionStrategy
 {
     private Eyes eyes;
+    private Agent agent;
 
     private void Start()
     {
         eyes = GetComponent<Eyes>();
+        agent = GetComponent<Agent>();
     }
 
     private void Update()
@@ -35,7 +37,7 @@ public class GreedySelection : SelectionStrategy
         if (bestValueItem != null &&
             Scoreboard.Instance.CanAdd(gameObject.GetInstanceID(), bestValueItem))
         {
-            Scoreboard.Instance.AddItem(gameObject.GetInstanceID(), bestValueItem);
+            Scoreboard.Instance.AddItem(gameObject, bestValueItem);
         }
     }
 }

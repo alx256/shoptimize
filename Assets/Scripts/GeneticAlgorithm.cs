@@ -107,6 +107,7 @@ public class GeneticAlgorithm : SelectionStrategy
     private HashSet<Item> seenItems;
     private static List<Item> itemsPool;
     private Eyes eyes;
+    private Agent agent;
     private const int MINIMUM_SEEN_ITEMS = 10;
     private const int POPULATION_SIZE = 1000;
     private const int TOURNAMENT_SIZE = 200;
@@ -122,6 +123,7 @@ public class GeneticAlgorithm : SelectionStrategy
     private void Start()
     {
         eyes = GetComponent<Eyes>();
+        agent = GetComponent<Agent>();
         seenItems = new();
         itemsPool = new();
         population = new Solution[POPULATION_SIZE];
@@ -196,7 +198,7 @@ public class GeneticAlgorithm : SelectionStrategy
                 {
                     for (int j = 0; j < occurences; j++)
                     {
-                        Scoreboard.Instance.AddItem(gameObject.GetInstanceID(), itemsPool[i]);
+                        agent.Fetch(itemsPool[i]);
                     }
                 }
             }
@@ -212,7 +214,7 @@ public class GeneticAlgorithm : SelectionStrategy
                 {
                     for (int i = 0; i < Mathf.Abs(change); i++)
                     {
-                        Scoreboard.Instance.RemoveItem(gameObject.GetInstanceID(), itemsPool[index]);
+                        agent.Discard(itemsPool[index]);
                     }
                 }
 
@@ -227,7 +229,7 @@ public class GeneticAlgorithm : SelectionStrategy
                 {
                     for (int i = 0; i < change; i++)
                     {
-                        Scoreboard.Instance.AddItem(gameObject.GetInstanceID(), itemsPool[index]);
+                        agent.Fetch(itemsPool[index]);
                     }
                 }
 
@@ -310,7 +312,15 @@ public class GeneticAlgorithm : SelectionStrategy
             if (Random.Range(0, 9) == 0)
             {
                 int multiplier = (Random.Range(0, 2) == 0) ? 1 : -1;
-                solution.Put(i, solution.Get(i) + 1 * multiplier);
+                int newVal = solution.Get(i) + multiplier;
+
+                if (newVal >= 0)
+                {
+                    // Should not be negative
+                    // (this will still work but can lead to unexpected problems
+                    // down the line)
+                    solution.Put(i, solution.Get(i) + 1 * multiplier);
+                }
             }
         }
 
