@@ -70,26 +70,26 @@ public class Scoreboard : MonoBehaviour
         UpdateRankings();
     }
 
-    public void AddItem(GameObject adder, Item item)
+    public bool AddItem(GameObject adder, Item item)
     {
         int id = adder.GetInstanceID();
 
         if (Vector3.Distance(adder.transform.position, item.transform.position) > Parameters.Instance.MaxPickupDistance)
         {
             Debug.LogWarning("Tried to add an item that was too far away!");
-            return;
+            return false;
         }
 
         if (!shoppingCarts.ContainsKey(id))
         {
             Debug.LogWarning("Tried to add item to unregistered id!");
-            return;
+            return false;
         }
 
         if (!CanAdd(id, item))
         {
             Debug.LogWarning("Tried to add item that there is no space for! Ignoring.");
-            return;
+            return false;
         }
 
         ShoppingCart cart = shoppingCarts[id];
@@ -104,22 +104,23 @@ public class Scoreboard : MonoBehaviour
         }
 
         UpdateRankings();
+        return true;
     }
 
-    public void RemoveItem(GameObject adder, Item item)
+    public bool RemoveItem(GameObject adder, Item item)
     {
         int id = adder.GetInstanceID();
 
         if (Vector3.Distance(adder.transform.position, item.transform.position) > Parameters.Instance.MaxPickupDistance)
         {
             Debug.LogWarning("Tried to remove an item but was too far away to put it back!");
-            return;
+            return false;
         }
 
         if (!shoppingCarts.ContainsKey(id))
         {
             Debug.LogWarning("Tried to add item to unregistered id!");
-            return;
+            return false;
         }
 
         ShoppingCart cart = shoppingCarts[id];
@@ -134,6 +135,7 @@ public class Scoreboard : MonoBehaviour
         }
 
         UpdateRankings();
+        return true;
     }
 
     public bool CanAdd(int id, Item item)

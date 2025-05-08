@@ -6,19 +6,29 @@ using UnityEngine.AI;
 
 public class Agent : MonoBehaviour
 {
+    private enum OperationAction
+    {
+        NONE,
+        FETCH,
+        DISCARD
+    }
+
+    private struct Operation
+    {
+        public Item itemOfInterest;
+        public OperationAction action;
+    }
+
     public string agentName = "Unnamed Agent";
 
     private MovementStrategy[] movementStrategies;
     private SelectionStrategy[] selectionStrategies;
     private NavMeshAgent navMeshAgent;
-    private bool isFetching = false;
-    private bool isDiscarding = false;
+    private Operation currentOperation;
     private bool isReturning = false;
     private Vector3 returnPoint;
     private Quaternion returnRotation;
-    private Item itemOfInterest;
-    private Queue<Item> fetchQueue = new();
-    private Queue<Item> discardQueue = new();
+    private Queue<Operation> operationQueue = new();
 
     public void Move(Vector3 movement)
     {
@@ -32,27 +42,27 @@ public class Agent : MonoBehaviour
         movementStrategies = GetComponents<MovementStrategy>();
         selectionStrategies = GetComponents<SelectionStrategy>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+
+        currentOperation = new();
+        currentOperation.action = OperationAction.NONE;
     }
 
     private void Update()
     {
         if (HasReachedPoint())
         {
-            if (isFetching || isDiscarding)
-            {
-                isReturning = true;
-                ClearDestination();
-                navMeshAgent.SetDestination(returnPoint);
+            OperationAction currentAction = currentOperation.action;
+            Item itemOfInterest = currentOperation.itemOfInterest;
 
-                if (isFetching)
+            if (currentAction != OperationAction.NONE)
+            {
+                if (currentAction == OperationAction.FETCH && Scoreboard.Instance.AddItem(gameObject, itemOfInterest) ||
+                    currentAction == OperationAction.DISCARD && Scoreboard.Instance.RemoveItem(gameObject, itemOfInterest))
                 {
-                    isFetching = false;
-                    Scoreboard.Instance.AddItem(gameObject, itemOfInterest);
-                }
-                else if (isDiscarding)
-                {
-                    isDiscarding = false;
-                    Scoreboard.Instance.RemoveItem(gameObject, itemOfInterest);
+                    currentOperation.action = OperationAction.NONE;
+                    isReturning = true;
+                    ClearDestination();
+                    navMeshAgent.SetDestination(returnPoint);
                 }
             }
 
@@ -65,39 +75,36 @@ public class Agent : MonoBehaviour
             }
         }
 
-        if (isFetching || isReturning || isDiscarding)
+        if (currentOperation.action != OperationAction.NONE || isReturning)
         {
             navMeshAgent.Move(transform.forward * Time.deltaTime);
         }
-        else if (fetchQueue.Count != 0 || discardQueue.Count != 0)
+        else if (operationQueue.Count != 0)
         {
-            if (fetchQueue.Count != 0)
-            {
-                isFetching = true;
-            }
-            else if (discardQueue.Count != 0)
-            {
-                isDiscarding = true;
-            }
-
-            Item item = (fetchQueue.Count != 0) ? fetchQueue.Dequeue() : discardQueue.Dequeue();
-            navMeshAgent.SetDestination(item.transform.position);
+            Operation operation = operationQueue.Dequeue();
+            currentOperation = operation;
+            navMeshAgent.SetDestination(operation.itemOfInterest.transform.position);
 
             returnPoint = transform.position;
             returnRotation = transform.rotation;
-            itemOfInterest = item;
             SetStrategiesEnabled(false);
         }
     }
 
     public void Fetch(Item item)
     {
-        fetchQueue.Enqueue(item);
+        Operation operation = new();
+        operation.action = OperationAction.FETCH;
+        operation.itemOfInterest = item;
+        operationQueue.Enqueue(operation);
     }
 
     public void Discard(Item item)
     {
-        discardQueue.Enqueue(item);
+        Operation operation = new();
+        operation.action = OperationAction.DISCARD;
+        operation.itemOfInterest = item;
+        operationQueue.Enqueue(operation);
     }
 
     public bool HasReachedPoint()

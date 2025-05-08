@@ -11028,7 +11028,7 @@ MonoBehaviour:
   shoppingCartCapacity: 300
   timeScale: 3
   environmentValuesSeed: 123
-  maxPickupDistance: 2
+  maxPickupDistance: 4
 --- !u!4 &1450376537
 Transform:
   m_ObjectHideFlags: 0
