@@ -130,7 +130,13 @@ public class Scoreboard : MonoBehaviour
         }
 
         ShoppingCart cart = shoppingCarts[id];
-        cart.Items.Remove(item);
+
+        if (!cart.Items.Remove(item))
+        {
+            Debug.LogWarning("Tried to remove an item that was not in the cart!");
+            return false;
+        }
+
         cart.TotalSize -= item.Size;
         cart.TotalSavings -= item.SavedValue;
 
