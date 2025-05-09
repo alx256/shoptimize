@@ -107,7 +107,7 @@ public class GeneticAlgorithm : SelectionStrategy
     private HashSet<Item> seenItems;
     private static List<Item> itemsPool;
     private Eyes eyes;
-    private Agent agent;
+    private Shopper shopper;
     private const int MINIMUM_SEEN_ITEMS = 10;
     private const int POPULATION_SIZE = 1000;
     private const int TOURNAMENT_SIZE = 200;
@@ -123,7 +123,7 @@ public class GeneticAlgorithm : SelectionStrategy
     private void Start()
     {
         eyes = GetComponent<Eyes>();
-        agent = GetComponent<Agent>();
+        shopper = GetComponent<Shopper>();
         seenItems = new();
         itemsPool = new();
         population = new Solution[POPULATION_SIZE];
@@ -201,7 +201,7 @@ public class GeneticAlgorithm : SelectionStrategy
                     {
                         for (int j = 0; j < occurences; j++)
                         {
-                            agent.Fetch(itemsPool[i]);
+                            shopper.Fetch(itemsPool[i]);
                         }
                     }
                 }
@@ -217,7 +217,7 @@ public class GeneticAlgorithm : SelectionStrategy
                     {
                         for (int i = 0; i < Mathf.Abs(change); i++)
                         {
-                            agent.Discard(itemsPool[index]);
+                            shopper.Discard(itemsPool[index]);
                         }
                     }
 
@@ -232,7 +232,7 @@ public class GeneticAlgorithm : SelectionStrategy
                     {
                         for (int i = 0; i < change; i++)
                         {
-                            agent.Fetch(itemsPool[index]);
+                            shopper.Fetch(itemsPool[index]);
                         }
                     }
 

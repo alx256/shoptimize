@@ -5,12 +5,10 @@ using UnityEngine;
 public class GreedySelection : SelectionStrategy
 {
     private Eyes eyes;
-    private Agent agent;
 
     private void Start()
     {
         eyes = GetComponent<Eyes>();
-        agent = GetComponent<Agent>();
     }
 
     private void Update()

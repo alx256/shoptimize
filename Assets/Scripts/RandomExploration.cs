@@ -2,21 +2,21 @@ using UnityEngine;
 
 public class RandomExploration : MovementStrategy
 {
-    private Agent agent;
+    private Shopper shopper;
     private Eyes eyes;
 
     private const int SPEED_DIVISOR = 50;
 
     private void Start()
     {
-        agent = GetComponent<Agent>();
+        shopper = GetComponent<Shopper>();
         eyes = GetComponent<Eyes>();
         RotateRandomly();
     }
 
     private void Update()
     {
-        agent.Move(transform.forward * Time.deltaTime);
+        shopper.Move(transform.forward * Time.deltaTime);
 
         if (eyes.ShortSightedLook().Count != 0)
         {

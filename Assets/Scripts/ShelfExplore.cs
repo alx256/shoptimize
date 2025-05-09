@@ -18,7 +18,7 @@ public class ShelfExplore : MovementStrategy
 
     private Phase phase = Phase.LOOKING;
     private Eyes eyes;
-    private Agent agent;
+    private Shopper shopper;
     private int shelfMask;
     private int itemMask;
     private int wallMask;
@@ -39,7 +39,7 @@ public class ShelfExplore : MovementStrategy
     {
         eyes = GetComponent<Eyes>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-        agent = GetComponent<Agent>();
+        shopper = GetComponent<Shopper>();
 
         shelfMask = 1 << LayerMask.NameToLayer("Shelf");
         itemMask = 1 << LayerMask.NameToLayer("Item");
@@ -109,11 +109,11 @@ public class ShelfExplore : MovementStrategy
 
     private void Moving()
     {
-        if (agent.HasReachedPoint())
+        if (shopper.HasReachedPoint())
         {
             transform.LookAt(new Vector3(currentShelf.transform.position.x, transform.position.y, currentShelf.transform.position.z));
             TransitionTo(Phase.EXPLORING);
-            agent.ClearDestination();
+            shopper.ClearDestination();
         }
     }
 
