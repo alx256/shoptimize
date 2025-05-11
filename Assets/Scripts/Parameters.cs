@@ -43,6 +43,12 @@ public class Parameters : MonoBehaviour
 
     private void Update()
     {
-        Time.timeScale = timeScale;
+        // If the timeScale has been set to 0 by another script,
+        // this means an experiment has finished and we should
+        // not interfere with this.
+        if (Time.timeScale != 0.0f)
+        {
+            Time.timeScale = timeScale;
+        }
     }
 }
