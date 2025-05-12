@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.MLAgents;
+using Unity.MLAgents.Policies;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -53,8 +56,7 @@ public class Shopper : MonoBehaviour
 
     public string shopperName = "Unnamed Shopper";
 
-    private MovementStrategy[] movementStrategies;
-    private SelectionStrategy[] selectionStrategies;
+    private List<MonoBehaviour> switchableComponents;
     private NavMeshAgent navMeshAgent;
     private Operation currentOperation;
     private bool isReturning = false;
@@ -69,8 +71,11 @@ public class Shopper : MonoBehaviour
     {
         Scoreboard.Instance.RegisterId(gameObject.GetInstanceID(), shopperName);
 
-        movementStrategies = GetComponents<MovementStrategy>();
-        selectionStrategies = GetComponents<SelectionStrategy>();
+        switchableComponents.AddRange(GetComponents<MovementStrategy>());
+        switchableComponents.AddRange(GetComponents<SelectionStrategy>());
+        switchableComponents.AddRange(GetComponents<ReinforcementLearningShopper>());
+        switchableComponents.AddRange(GetComponents<BehaviorParameters>());
+        switchableComponents.AddRange(GetComponents<DecisionRequester>());
         navMeshAgent = GetComponent<NavMeshAgent>();
 
         currentOperation = new();
@@ -220,14 +225,9 @@ public class Shopper : MonoBehaviour
     /// enable strategies and <c>false</c> to disable.</param>
     private void SetStrategiesEnabled(bool enabled)
     {
-        for (int i = 0; i < movementStrategies.Length; i++)
+        for (int i = 0; i < switchableComponents.Count; i++)
         {
-            movementStrategies[i].enabled = enabled;
-        }
-
-        for (int i = 0; i < selectionStrategies.Length; i++)
-        {
-            selectionStrategies[i].enabled = enabled;
+            switchableComponents[i].enabled = enabled;
         }
     }
 }

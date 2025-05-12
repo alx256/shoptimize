@@ -12,10 +12,22 @@ public class Timer : MonoBehaviour
     private TMP_Text timerText;
 
     private float remainingTime = 0.0f;
+    private static Timer instance;
+
+    public static Timer Instance
+    {
+        get { return instance; }
+    }
+
+    public float RemainingTime
+    {
+        get { return remainingTime; }
+    }
 
     private void Start()
     {
         remainingTime = minutes * 60 + seconds;
+        instance = this;
     }
 
     private void Update()
@@ -26,6 +38,7 @@ public class Timer : MonoBehaviour
         {
             remainingTime = 0.0f;
             Time.timeScale = 0.0f;
+            Parameters.Instance.IsDone = true;
         }
 
         int minutes = Mathf.FloorToInt(remainingTime / 60);

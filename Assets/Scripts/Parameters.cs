@@ -24,6 +24,7 @@ public class Parameters : MonoBehaviour
     private int environmentValuesSeed = 123;
     [SerializeField]
     private float maxPickupDistance = 2.0f;
+    private bool isDone = false;
 
     public static Parameters Instance { get { return instance; } }
     public float MinBaseValue { get { return minBaseValue; } }
@@ -35,6 +36,7 @@ public class Parameters : MonoBehaviour
     public float ShoppingCartCapacity { get { return shoppingCartCapacity; } }
     public int EnvironmentValuesSeed { get { return environmentValuesSeed; } }
     public float MaxPickupDistance { get { return maxPickupDistance; } }
+    public bool IsDone { get { return isDone; } set { isDone = value; } }
 
     private void Awake()
     {
@@ -46,7 +48,7 @@ public class Parameters : MonoBehaviour
         // If the timeScale has been set to 0 by another script,
         // this means an experiment has finished and we should
         // not interfere with this.
-        if (Time.timeScale != 0.0f)
+        if (!isDone)
         {
             Time.timeScale = timeScale;
         }
