@@ -16,7 +16,9 @@ public class ReinforcementLearningShopper : Agent
     private Shopper shopper;
     private Eyes eyes;
     private readonly HashSet<GameObject> seenItems = new();
+    private readonly HashSet<GameObject> seenShelves = new();
     private int itemMask;
+    private int shelfMask;
     private int totalItemCount = int.MaxValue;
     private const float TARGET_COVERAGE = 0.62f;
 
@@ -25,6 +27,7 @@ public class ReinforcementLearningShopper : Agent
         shopper = GetComponent<Shopper>();
         eyes = GetComponent<Eyes>();
         itemMask = 1 << LayerMask.NameToLayer("Item");
+        shelfMask = 1 << LayerMask.NameToLayer("Shelf");
 
         if (Academy.Instance.IsCommunicatorOn)
         {
@@ -53,12 +56,15 @@ public class ReinforcementLearningShopper : Agent
         bool canSeeShelf = false;
         float[] savedValues = new float[3];
         float[] itemSizes = new float[3];
+        bool isNewItem = false;
+        bool isNewShelf = false;
 
         GameObject justInFrontItemObject = eyes.PeekDirectlyInFront(mask: itemMask);
         if (justInFrontItemObject != null)
         {
             canSeeItem = true;
             itemPos = justInFrontItemObject.transform.position;
+            isNewItem = !seenItems.Contains(justInFrontItemObject);
         }
 
         GameObject justInFrontAllObjects = eyes.PeekDirectlyInFront(mask: int.MaxValue);
@@ -74,6 +80,7 @@ public class ReinforcementLearningShopper : Agent
             GameObject shelfObject = longSightedLookObjects.First();
             canSeeShelf = true;
             shelfPos = shelfObject.transform.position;
+            isNewShelf = !seenShelves.Contains(shelfObject);
         }
 
         HashSet<GameObject> scanResults = eyes.ShortSightedScan();
@@ -101,6 +108,8 @@ public class ReinforcementLearningShopper : Agent
         sensor.AddObservation(shelfPos);
         sensor.AddObservation(savedValues);
         sensor.AddObservation(itemSizes);
+        sensor.AddObservation(isNewItem);
+        sensor.AddObservation(isNewShelf);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -112,13 +121,13 @@ public class ReinforcementLearningShopper : Agent
         // (positive = forwards / negative = backwards)
         float forwardBackMovement;
         // How much to rotate along the yAxis
-        float yAxisRotation = actions.ContinuousActions[2];
+        float yAxisRotation = actions.DiscreteActions[2] - 360;
 
-        if (actions.ContinuousActions[0] == 0.0f)
+        if (actions.DiscreteActions[0] == 1)
         {
             leftRightMovement = 0.0f;
         }
-        else if (actions.ContinuousActions[0] > 0.0f)
+        else if (actions.DiscreteActions[0] == 2)
         {
             leftRightMovement = 1.0f;
         }
@@ -127,11 +136,11 @@ public class ReinforcementLearningShopper : Agent
             leftRightMovement = -1.0f;
         }
 
-        if (actions.ContinuousActions[1] == 0.0f)
+        if (actions.DiscreteActions[1] == 1)
         {
             forwardBackMovement = 0.0f;
         }
-        else if (actions.ContinuousActions[1] > 0.0f)
+        else if (actions.DiscreteActions[1] == 2)
         {
             forwardBackMovement = 1.0f;
         }
@@ -144,11 +153,11 @@ public class ReinforcementLearningShopper : Agent
         shopper.Move(Quaternion.AngleAxis(-90.0f, Vector3.up) *
             transform.forward *
             leftRightMovement *
-            Time.deltaTime);
+            Time.fixedDeltaTime);
 
         // Forward / back movement
         Vector3 before = transform.position;
-        shopper.Move(forwardBackMovement * Time.deltaTime * transform.forward);
+        shopper.Move(forwardBackMovement * Time.fixedDeltaTime * transform.forward);
         Vector3 after = transform.position;
 
         if (Vector3.Distance(before, after) < 0.01f)
@@ -157,21 +166,39 @@ public class ReinforcementLearningShopper : Agent
         }
 
         // Rotation
-        transform.Rotate(0.0f, 45.0f * yAxisRotation * Time.deltaTime, 0.0f);
+        transform.Rotate(0.0f, yAxisRotation * Time.fixedDeltaTime, 0.0f);
 
         List<GameObject> scanResultsList = eyes.ShortSightedScan().ToList();
         HashSet<GameObject> longSightedLookResults = eyes.LongSightedLook();
 
-        if (longSightedLookResults.Count != 0 && longSightedLookResults.First().layer == LayerMask.NameToLayer("Shelf"))
+        if (longSightedLookResults.Count != 0)
         {
-            AddReward(0.005f);
+            GameObject longSightObject = longSightedLookResults.First();
+
+            if (longSightObject.layer == LayerMask.NameToLayer("Shelf"))
+            {
+                AddReward(0.005f);
+
+                if (!seenShelves.Contains(longSightObject))
+                {
+                    AddReward(0.022f);
+                }
+            }
+
+        }
+
+        GameObject jif = eyes.PeekDirectlyInFront(mask: shelfMask);
+
+        if (jif != null)
+        {
+            seenShelves.Add(jif);
         }
 
         foreach (GameObject result in scanResultsList)
         {
             if (!seenItems.Contains(result))
             {
-                AddReward(50.0f);
+                AddReward(70.0f);
                 seenItems.Add(result);
             }
             else

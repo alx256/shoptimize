@@ -43,7 +43,7 @@ public class Item : MonoBehaviour
         size = (size == -1) ?
             RandomFloat(parameters.MinSize, parameters.MaxSize) :
             size;
-        savedValue = baseValue - (baseValue * discount);
+        savedValue = baseValue * discount;
     }
 
     private float RandomFloat(float start, float end)
