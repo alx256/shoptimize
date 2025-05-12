@@ -315,15 +315,15 @@ public class GeneticAlgorithm : SelectionStrategy
         {
             if (Random.Range(0, 9) == 0)
             {
-                int multiplier = (Random.Range(0, 2) == 0) ? 1 : -1;
-                int newVal = solution.Get(i) + multiplier;
+                int add = Random.Range(0, 6) - 3;
+                int newVal = solution.Get(i) + add;
 
                 if (newVal >= 0)
                 {
                     // Should not be negative
                     // (this will still work but can lead to unexpected problems
                     // down the line)
-                    solution.Put(i, solution.Get(i) + 1 * multiplier);
+                    solution.Put(i, newVal);
                 }
             }
         }
