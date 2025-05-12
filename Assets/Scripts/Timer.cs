@@ -11,12 +11,19 @@ public class Timer : MonoBehaviour
     [SerializeField]
     private TMP_Text timerText;
 
+    private float totalTime = 0.0f;
     private float remainingTime = 0.0f;
+
     private static Timer instance;
 
     public static Timer Instance
     {
         get { return instance; }
+    }
+
+    public float TotalTime
+    {
+        get { return totalTime; }
     }
 
     public float RemainingTime
@@ -26,7 +33,8 @@ public class Timer : MonoBehaviour
 
     private void Start()
     {
-        remainingTime = minutes * 60 + seconds;
+        totalTime = minutes * 60 + seconds;
+        remainingTime = totalTime;
         instance = this;
     }
 

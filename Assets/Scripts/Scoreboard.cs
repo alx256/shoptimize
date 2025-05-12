@@ -56,6 +56,14 @@ public class Scoreboard : MonoBehaviour
 
     public static Scoreboard Instance { get { return instance; } }
 
+    public Dictionary<int, ShoppingCart> ShoppingCarts
+    {
+        get
+        {
+            return shoppingCarts;
+        }
+    }
+
     public void RegisterId(int id, string name)
     {
         // Insert at last rank by default.

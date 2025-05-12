@@ -56,7 +56,7 @@ public class Shopper : MonoBehaviour
 
     public string shopperName = "Unnamed Shopper";
 
-    private List<MonoBehaviour> switchableComponents;
+    private List<MonoBehaviour> switchableComponents = new();
     private NavMeshAgent navMeshAgent;
     private Operation currentOperation;
     private bool isReturning = false;
@@ -143,6 +143,11 @@ public class Shopper : MonoBehaviour
     /// in.</param>
     public void Move(Vector3 movement)
     {
+        if (navMeshAgent == null)
+        {
+            navMeshAgent = GetComponent<NavMeshAgent>();
+        }
+
         navMeshAgent.Move(movement);
     }
 
@@ -178,6 +183,11 @@ public class Shopper : MonoBehaviour
     /// that it is moving towards.</returns>
     public bool HasReachedPoint()
     {
+        if (navMeshAgent == null)
+        {
+            navMeshAgent = GetComponent<NavMeshAgent>();
+        }
+
         return !navMeshAgent.pathPending &&
             navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance &&
             (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude == 0f);
@@ -188,6 +198,11 @@ public class Shopper : MonoBehaviour
     /// </summary>
     public void ClearDestination()
     {
+        if (navMeshAgent == null)
+        {
+            navMeshAgent = GetComponent<NavMeshAgent>();
+        }
+
         navMeshAgent.isStopped = true;
         navMeshAgent.ResetPath();
     }
@@ -202,6 +217,11 @@ public class Shopper : MonoBehaviour
     /// to</param>
     private void AddOperation(OperationAction action, Item item)
     {
+        if (navMeshAgent == null)
+        {
+            navMeshAgent = GetComponent<NavMeshAgent>();
+        }
+
         Operation operation = new()
         {
             action = action,
