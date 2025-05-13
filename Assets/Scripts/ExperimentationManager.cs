@@ -24,9 +24,9 @@ public class ExperimentationManager : MonoBehaviour
         public float[] minOverTime;
 
         [NonSerialized]
-        public float mean;
+        public float currentMax;
         [NonSerialized]
-        public float[] meanValues;
+        public float[] values;
     }
 
     private readonly Dictionary<string, AgentResults> results = new();
@@ -115,15 +115,13 @@ public class ExperimentationManager : MonoBehaviour
     {
         foreach (AgentResults result in results.Values)
         {
-            result.mean /= stepCount;
-
-            if (result.meanValues == null)
+            if (result.values == null)
             {
-                result.meanValues = new float[experimentCount];
+                result.values = new float[experimentCount];
             }
 
-            result.meanValues[experimentNumber] = result.mean;
-            result.mean = 0;
+            result.values[experimentNumber] = result.currentMax;
+            result.currentMax = 0;
         }
 
         experimentNumber++;
@@ -139,7 +137,7 @@ public class ExperimentationManager : MonoBehaviour
             results[name] = new()
             {
                 name = name,
-                results = results[name].meanValues,
+                results = results[name].values,
                 maxOverTime = results[name].maxOverTime,
                 minOverTime = results[name].minOverTime
             };
@@ -150,7 +148,7 @@ public class ExperimentationManager : MonoBehaviour
     {
         stepCount++;
 
-        if (Scoreboard.Instance == null)
+        if (Scoreboard.Instance == null || Timer.Instance == null)
         {
             return;
         }
@@ -163,7 +161,7 @@ public class ExperimentationManager : MonoBehaviour
             }
 
             // Add the results for this run
-            results[cart.AgentName].mean += cart.TotalSavings;
+            results[cart.AgentName].currentMax = Mathf.Max(results[cart.AgentName].currentMax, cart.TotalSavings);
 
             int second = Mathf.FloorToInt(Timer.Instance.TotalTime - Timer.Instance.RemainingTime);
             float[] maxOverTime = results[cart.AgentName].maxOverTime;

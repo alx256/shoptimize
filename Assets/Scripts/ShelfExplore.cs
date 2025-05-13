@@ -22,6 +22,7 @@ public class ShelfExplore : MovementStrategy
     private int shelfMask;
     private int itemMask;
     private int wallMask;
+    private int agentMask;
     private Queue<GameObject> shelfQueue;
     private GameObject currentShelf;
     private HashSet<GameObject> shelfPool;
@@ -34,6 +35,7 @@ public class ShelfExplore : MovementStrategy
     private int multiplier = 1;
     private int hits = 0;
     private int cycles = 0;
+    private Vector3 previousPosition;
 
     private void Start()
     {
@@ -44,9 +46,11 @@ public class ShelfExplore : MovementStrategy
         shelfMask = 1 << LayerMask.NameToLayer("Shelf");
         itemMask = 1 << LayerMask.NameToLayer("Item");
         wallMask = 1 << LayerMask.NameToLayer("Wall");
+        agentMask = 1 << LayerMask.NameToLayer("Agent");
 
         shelfQueue = new();
         shelfPool = new();
+        transform.Rotate(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
     }
 
     private void Update()
@@ -141,10 +145,15 @@ public class ShelfExplore : MovementStrategy
         HashSet<GameObject> lookingAtItems = eyes.ShortSightedLook(mask: itemMask);
 
         transform.Rotate(0.0f, 90.0f * multiplier, 0.0f);
+        GameObject agentDirectlyInFront = eyes.PeekDirectlyInFront(agentMask);
         GameObject wallDirectlyInFront = eyes.PeekDirectlyInFront(wallMask);
         GameObject itemDirectlyInFront = eyes.PeekDirectlyInFront(itemMask);
         transform.Rotate(0.0f, -90.0f * multiplier, 0.0f);
 
+        if (agentDirectlyInFront)
+        {
+            multiplier *= -1;
+        }
         if (itemDirectlyInFront)
         {
             transform.Rotate(0.0f, 90.0f * multiplier, 0.0f);
@@ -154,7 +163,7 @@ public class ShelfExplore : MovementStrategy
             multiplier *= -1;
             hits++;
         }
-        else if (lookingAtShelves.Count == 0)
+        else if (lookingAtShelves.Count == 0 && lastViewedItem != null)
         {
             isRotating = true;
             rotateAroundPoint = lastViewedItem.transform.position;

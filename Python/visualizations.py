@@ -9,14 +9,15 @@ def boxplots(obj):
     boxplot_data = []
     labels = []
 
-    for result in obj["results"]:
+    for result in sorted(obj["results"], key=lambda x: x["name"]):
         # Boxplot for mean result of each experiment
         boxplot_data.append(result["results"])
         labels.append(result["name"])
 
     plt.boxplot(boxplot_data, tick_labels=labels)
-    plt.title("Mean results for each experiment")
-    plt.ylabel("Mean amount saved ($)")
+    plt.title("Experiment Results")
+    plt.xticks(rotation=11)
+    plt.ylabel("Amount saved ($)")
 
 
 def performance_line_chart(obj):

@@ -59,6 +59,11 @@ public class ReinforcementLearningShopper : Agent
         bool isNewItem = false;
         bool isNewShelf = false;
 
+        if (eyes == null)
+        {
+            return;
+        }
+
         GameObject justInFrontItemObject = eyes.PeekDirectlyInFront(mask: itemMask);
         if (justInFrontItemObject != null)
         {
@@ -114,6 +119,11 @@ public class ReinforcementLearningShopper : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        if (shopper == null)
+        {
+            return;
+        }
+
         // How much to move left / right
         // (positive = left / negative = right)
         float leftRightMovement;
